@@ -19,6 +19,19 @@ local function createGUI()
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = screenGui
 
+    -- 缩小按钮(-)
+    local minimizeButton = Instance.new("TextButton")
+    minimizeButton.Name = "MinimizeButton"
+    minimizeButton.Size = UDim2.new(0, 30, 0, 30)
+    minimizeButton.Position = UDim2.new(1, -70, 0, 5)
+    minimizeButton.BackgroundColor3 = Color3.new(0.5, 0.5, 0.5)
+    minimizeButton.Text = "-"
+    minimizeButton.TextColor3 = Color3.new(1, 1, 1)
+    minimizeButton.TextSize = 18
+    minimizeButton.Font = Enum.Font.SourceSansBold
+    minimizeButton.Parent = mainFrame
+
+    -- 关闭按钮(X)
     local closeButton = Instance.new("TextButton")
     closeButton.Name = "CloseButton"
     closeButton.Size = UDim2.new(0, 30, 0, 30)
@@ -30,37 +43,7 @@ local function createGUI()
     closeButton.Font = Enum.Font.SourceSansBold
     closeButton.Parent = mainFrame
 
-    closeButton.MouseButton1Click:Connect(function()
-        screenGui:Destroy()
-    end)
-
-    local isDragging = false
-    local dragStartPos, frameStartPos
-
-    mainFrame.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = true
-            dragStartPos = input.Position
-            frameStartPos = mainFrame.Position
-        end
-    end)
-
-    UserInputService.InputChanged:Connect(function(input)
-        if isDragging and input.UserInputType == Enum.UserInputType.MouseMovement then
-            local delta = input.Position - dragStartPos
-            mainFrame.Position = UDim2.new(
-                frameStartPos.X.Scale, frameStartPos.X.Offset + delta.X,
-                frameStartPos.Y.Scale, frameStartPos.Y.Offset + delta.Y
-            )
-        end
-    end)
-
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.MouseButton1 then
-            isDragging = false
-        end
-    end)
-
+    -- 标题标签
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Name = "TitleLabel"
     titleLabel.Size = UDim2.new(1, 0, 0, 50)
@@ -72,6 +55,7 @@ local function createGUI()
     titleLabel.Font = Enum.Font.SourceSansBold
     titleLabel.Parent = mainFrame
 
+    -- 作者标签
     local authorLabel = Instance.new("TextLabel")
     authorLabel.Name = "AuthorLabel"
     authorLabel.Size = UDim2.new(1, 0, 0, 20)
@@ -83,6 +67,7 @@ local function createGUI()
     authorLabel.Font = Enum.Font.SourceSans
     authorLabel.Parent = mainFrame
 
+    -- 功能按钮
     local button1 = Instance.new("TextButton")
     button1.Name = "Button_Store"
     button1.Size = UDim2.new(1, -20, 0, 60)
@@ -127,6 +112,89 @@ local function createGUI()
     button4.Font = Enum.Font.SourceSansBold
     button4.Parent = mainFrame
 
+    -- 保存原始状态（用于缩小/恢复）
+    local originalSize = mainFrame.Size
+    local collapsibleElements = {authorLabel, button1, button2, button3, button4}
+    local isMinimized = false
+
+    -- 缩小/恢复功能
+    minimizeButton.MouseButton1Click:Connect(function()
+        isMinimized = not isMinimized
+        if isMinimized then
+            mainFrame.Size = UDim2.new(0, 400, 0, 50)
+            for _, elem in ipairs(collapsibleElements) do
+                elem.Visible = false
+            end
+        else
+            mainFrame.Size = originalSize
+            for _, elem in ipairs(collapsibleElements) do
+                elem.Visible = true
+            end
+        end
+    end)
+
+    -- 关闭功能
+    closeButton.MouseButton1Click:Connect(function()
+        screenGui:Destroy()
+    end)
+
+    -- 拖动功能（同时支持鼠标和触摸）
+    local isDragging = false
+    local dragStartPos, frameStartPos
+    local activeTouchId = nil -- 记录当前活跃的触摸ID（用于单指拖动）
+
+    -- 开始拖动（鼠标按下或触摸开始）
+    mainFrame.InputBegan:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            -- 鼠标输入
+            isDragging = true
+            dragStartPos = input.Position
+            frameStartPos = mainFrame.Position
+        elseif input.UserInputType == Enum.UserInputType.Touch then
+            -- 触摸输入（单指）
+            if not activeTouchId then
+                activeTouchId = input.TouchId
+                isDragging = true
+                dragStartPos = input.Position
+                frameStartPos = mainFrame.Position
+            end
+        end
+    end)
+
+    -- 拖动中（鼠标移动或触摸移动）
+    UserInputService.InputChanged:Connect(function(input)
+        if isDragging then
+            if input.UserInputType == Enum.UserInputType.MouseMovement then
+                -- 鼠标移动
+                local delta = input.Position - dragStartPos
+                mainFrame.Position = UDim2.new(
+                    frameStartPos.X.Scale, frameStartPos.X.Offset + delta.X,
+                    frameStartPos.Y.Scale, frameStartPos.Y.Offset + delta.Y
+                )
+            elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == activeTouchId then
+                -- 触摸移动（匹配活跃触摸ID）
+                local delta = input.Position - dragStartPos
+                mainFrame.Position = UDim2.new(
+                    frameStartPos.X.Scale, frameStartPos.X.Offset + delta.X,
+                    frameStartPos.Y.Scale, frameStartPos.Y.Offset + delta.Y
+                )
+            end
+        end
+    end)
+
+    -- 结束拖动（鼠标释放或触摸结束）
+    UserInputService.InputEnded:Connect(function(input)
+        if input.UserInputType == Enum.UserInputType.MouseButton1 then
+            -- 鼠标释放
+            isDragging = false
+        elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == activeTouchId then
+            -- 触摸结束（匹配活跃触摸ID）
+            isDragging = false
+            activeTouchId = nil
+        end
+    end)
+
+    -- 按钮功能
     button1.MouseButton1Click:Connect(function()
         if isTargetPlayer then
             local gui003A = playerGui:FindFirstChild("003-A")
