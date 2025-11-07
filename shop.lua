@@ -1,14 +1,16 @@
---4.0
+--5.0
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local UserInputService = game:GetService("UserInputService")
 
 local isTargetPlayer = true
 local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+local shouldRecreate = true
+local savedPosition
 
 local uiParams = isMobile and {
     mainFrameSize = UDim2.new(0, 300, 0, 260),
-    mainFramePos = UDim2.new(0.5, -150, 0.5, -130),
+    defaultPos = UDim2.new(0.5, -150, 0.5, -130),
     buttonSize = UDim2.new(1, -16, 0, 45),
     buttonTextSize = 16,
     titleTextSize = 22,
@@ -17,7 +19,7 @@ local uiParams = isMobile and {
     minButtonTextSize = 14
 } or {
     mainFrameSize = UDim2.new(0, 400, 0, 350),
-    mainFramePos = UDim2.new(0.5, -200, 0.5, -175),
+    defaultPos = UDim2.new(0.5, -200, 0.5, -175),
     buttonSize = UDim2.new(1, -20, 0, 60),
     buttonTextSize = 20,
     titleTextSize = 28,
@@ -36,15 +38,19 @@ local function createGUI()
     local mainFrame = Instance.new("Frame")
     mainFrame.Name = "MainFrame"
     mainFrame.Size = uiParams.mainFrameSize
-    mainFrame.Position = uiParams.mainFramePos
+    mainFrame.Position = savedPosition or uiParams.defaultPos
     mainFrame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = screenGui
 
+    local btnWidth = uiParams.minButtonSize.X.Offset
+    local btnSpacing = 8
+    local edgeMargin = 5
+
     local minimizeButton = Instance.new("TextButton")
     minimizeButton.Name = "MinimizeButton"
     minimizeButton.Size = uiParams.minButtonSize
-    minimizeButton.Position = UDim2.new(1, -uiParams.minButtonSize.X.Offset - 5, 0, 5)
+    minimizeButton.Position = UDim2.new(1, -btnWidth - btnSpacing - btnWidth - edgeMargin, 0, edgeMargin)
     minimizeButton.BackgroundColor3 = Color3.new(0.5, 0.5, 0.5)
     minimizeButton.Text = "-"
     minimizeButton.TextColor3 = Color3.new(1, 1, 1)
@@ -55,7 +61,7 @@ local function createGUI()
     local closeButton = Instance.new("TextButton")
     closeButton.Name = "CloseButton"
     closeButton.Size = uiParams.minButtonSize
-    closeButton.Position = UDim2.new(1, -uiParams.minButtonSize.X.Offset - 5, 0, 5 + uiParams.minButtonSize.Y.Offset + 5)
+    closeButton.Position = UDim2.new(1, -btnWidth - edgeMargin, 0, edgeMargin)
     closeButton.BackgroundColor3 = Color3.new(0.8, 0, 0)
     closeButton.Text = "X"
     closeButton.TextColor3 = Color3.new(1, 1, 1)
@@ -152,6 +158,8 @@ local function createGUI()
 
     closeButton.MouseButton1Click:Connect(function()
         screenGui:Destroy()
+        shouldRecreate = false
+        savedPosition = nil
     end)
 
     local isDragging = false
@@ -181,12 +189,14 @@ local function createGUI()
                     frameStartPos.X.Scale, frameStartPos.X.Offset + delta.X,
                     frameStartPos.Y.Scale, frameStartPos.Y.Offset + delta.Y
                 )
+                savedPosition = mainFrame.Position
             elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == activeTouchId then
                 local delta = input.Position - dragStartPos
                 mainFrame.Position = UDim2.new(
                     frameStartPos.X.Scale, frameStartPos.X.Offset + delta.X,
                     frameStartPos.Y.Scale, frameStartPos.Y.Offset + delta.Y
                 )
+                savedPosition = mainFrame.Position
             end
         end
     end)
@@ -194,9 +204,13 @@ local function createGUI()
     UserInputService.InputEnded:Connect(function(input)
         if input.UserInputType == Enum.UserInputType.MouseButton1 then
             isDragging = false
-        elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == activeTouchId then
-            isDragging = false
-            activeTouchId = nil
+            savedPosition = mainFrame.Position
+        elseif input.UserInputType == Enum.UserInputType.Touch then
+            if input.TouchId == activeTouchId then
+                isDragging = false
+                activeTouchId = nil
+                savedPosition = mainFrame.Position
+            end
         end
     end)
 
@@ -238,4 +252,8 @@ local function createGUI()
 end
 
 createGUI()
-player.CharacterAdded:Connect(createGUI)
+player.CharacterAdded:Connect(function()
+    if shouldRecreate then
+        createGUI()
+    end
+end)
