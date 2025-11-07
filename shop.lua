@@ -1,8 +1,30 @@
+--4.0
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local UserInputService = game:GetService("UserInputService")
 
 local isTargetPlayer = true
+local isMobile = UserInputService.TouchEnabled and not UserInputService.KeyboardEnabled
+
+local uiParams = isMobile and {
+    mainFrameSize = UDim2.new(0, 300, 0, 260),
+    mainFramePos = UDim2.new(0.5, -150, 0.5, -130),
+    buttonSize = UDim2.new(1, -16, 0, 45),
+    buttonTextSize = 16,
+    titleTextSize = 22,
+    authorTextSize = 12,
+    minButtonSize = UDim2.new(0, 24, 0, 24),
+    minButtonTextSize = 14
+} or {
+    mainFrameSize = UDim2.new(0, 400, 0, 350),
+    mainFramePos = UDim2.new(0.5, -200, 0.5, -175),
+    buttonSize = UDim2.new(1, -20, 0, 60),
+    buttonTextSize = 20,
+    titleTextSize = 28,
+    authorTextSize = 14,
+    minButtonSize = UDim2.new(0, 30, 0, 30),
+    minButtonTextSize = 18
+}
 
 local function createGUI()
     local screenGui = Instance.new("ScreenGui")
@@ -13,97 +35,99 @@ local function createGUI()
 
     local mainFrame = Instance.new("Frame")
     mainFrame.Name = "MainFrame"
-    mainFrame.Size = UDim2.new(0, 400, 0, 350)
-    mainFrame.Position = UDim2.new(0.5, -200, 0.5, -175)
+    mainFrame.Size = uiParams.mainFrameSize
+    mainFrame.Position = uiParams.mainFramePos
     mainFrame.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
     mainFrame.BorderSizePixel = 0
     mainFrame.Parent = screenGui
 
     local minimizeButton = Instance.new("TextButton")
     minimizeButton.Name = "MinimizeButton"
-    minimizeButton.Size = UDim2.new(0, 30, 0, 30)
-    minimizeButton.Position = UDim2.new(1, -70, 0, 5)
+    minimizeButton.Size = uiParams.minButtonSize
+    minimizeButton.Position = UDim2.new(1, -uiParams.minButtonSize.X.Offset - 5, 0, 5)
     minimizeButton.BackgroundColor3 = Color3.new(0.5, 0.5, 0.5)
     minimizeButton.Text = "-"
     minimizeButton.TextColor3 = Color3.new(1, 1, 1)
-    minimizeButton.TextSize = 18
+    minimizeButton.TextSize = uiParams.minButtonTextSize
     minimizeButton.Font = Enum.Font.SourceSansBold
     minimizeButton.Parent = mainFrame
 
     local closeButton = Instance.new("TextButton")
     closeButton.Name = "CloseButton"
-    closeButton.Size = UDim2.new(0, 30, 0, 30)
-    closeButton.Position = UDim2.new(1, -35, 0, 5)
+    closeButton.Size = uiParams.minButtonSize
+    closeButton.Position = UDim2.new(1, -uiParams.minButtonSize.X.Offset - 5, 0, 5 + uiParams.minButtonSize.Y.Offset + 5)
     closeButton.BackgroundColor3 = Color3.new(0.8, 0, 0)
     closeButton.Text = "X"
     closeButton.TextColor3 = Color3.new(1, 1, 1)
-    closeButton.TextSize = 18
+    closeButton.TextSize = uiParams.minButtonTextSize
     closeButton.Font = Enum.Font.SourceSansBold
     closeButton.Parent = mainFrame
 
     local titleLabel = Instance.new("TextLabel")
     titleLabel.Name = "TitleLabel"
-    titleLabel.Size = UDim2.new(1, 0, 0, 50)
+    titleLabel.Size = UDim2.new(1, 0, 0, 40)
     titleLabel.Position = UDim2.new(0, 0, 0, 0)
     titleLabel.BackgroundTransparency = 1
     titleLabel.Text = "商店控制器"
     titleLabel.TextColor3 = Color3.new(1, 1, 1)
-    titleLabel.TextSize = 28
+    titleLabel.TextSize = uiParams.titleTextSize
     titleLabel.Font = Enum.Font.SourceSansBold
     titleLabel.Parent = mainFrame
 
     local authorLabel = Instance.new("TextLabel")
     authorLabel.Name = "AuthorLabel"
-    authorLabel.Size = UDim2.new(1, 0, 0, 20)
-    authorLabel.Position = UDim2.new(0, 0, 0, 50)
+    authorLabel.Size = UDim2.new(1, 0, 0, 16)
+    authorLabel.Position = UDim2.new(0, 0, 0, 40)
     authorLabel.BackgroundTransparency = 1
     authorLabel.Text = "脚本by:白羽"
     authorLabel.TextColor3 = Color3.new(1, 0, 0)
-    authorLabel.TextSize = 14
+    authorLabel.TextSize = uiParams.authorTextSize
     authorLabel.Font = Enum.Font.SourceSans
     authorLabel.Parent = mainFrame
 
+    local buttonYOffsets = isMobile and {60, 115, 170, 225} or {80, 150, 220, 290}
+
     local button1 = Instance.new("TextButton")
     button1.Name = "Button_Store"
-    button1.Size = UDim2.new(1, -20, 0, 60)
-    button1.Position = UDim2.new(0, 10, 0, 80)
+    button1.Size = uiParams.buttonSize
+    button1.Position = UDim2.new(0, 8, 0, buttonYOffsets[1])
     button1.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
     button1.Text = "打开\\关闭商店GUI"
     button1.TextColor3 = Color3.new(1, 1, 1)
-    button1.TextSize = 20
+    button1.TextSize = uiParams.buttonTextSize
     button1.Font = Enum.Font.SourceSansBold
     button1.Parent = mainFrame
 
     local button2 = Instance.new("TextButton")
     button2.Name = "Button_UTCM"
-    button2.Size = UDim2.new(1, -20, 0, 60)
-    button2.Position = UDim2.new(0, 10, 0, 150)
+    button2.Size = uiParams.buttonSize
+    button2.Position = UDim2.new(0, 8, 0, buttonYOffsets[2])
     button2.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
     button2.Text = "打开\\关闭UTCM商店GUI"
     button2.TextColor3 = Color3.new(0, 0, 1)
-    button2.TextSize = 20
+    button2.TextSize = uiParams.buttonTextSize
     button2.Font = Enum.Font.SourceSansBold
     button2.Parent = mainFrame
 
     local button3 = Instance.new("TextButton")
     button3.Name = "Button_UTSM"
-    button3.Size = UDim2.new(1, -20, 0, 60)
-    button3.Position = UDim2.new(0, 10, 0, 220)
+    button3.Size = uiParams.buttonSize
+    button3.Position = UDim2.new(0, 8, 0, buttonYOffsets[3])
     button3.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
     button3.Text = "打开\\关闭UTSM商店GUI"
     button3.TextColor3 = Color3.new(1, 0, 0)
-    button3.TextSize = 20
+    button3.TextSize = uiParams.buttonTextSize
     button3.Font = Enum.Font.SourceSansBold
     button3.Parent = mainFrame
 
     local button4 = Instance.new("TextButton")
     button4.Name = "Button_UTTV"
-    button4.Size = UDim2.new(1, -20, 0, 60)
-    button4.Position = UDim2.new(0, 10, 0, 290)
+    button4.Size = uiParams.buttonSize
+    button4.Position = UDim2.new(0, 8, 0, buttonYOffsets[4])
     button4.BackgroundColor3 = Color3.new(0.3, 0.3, 0.3)
     button4.Text = "打开\\关闭UTTV商店GUI"
     button4.TextColor3 = Color3.new(1, 0, 1)
-    button4.TextSize = 20
+    button4.TextSize = uiParams.buttonTextSize
     button4.Font = Enum.Font.SourceSansBold
     button4.Parent = mainFrame
 
@@ -114,7 +138,7 @@ local function createGUI()
     minimizeButton.MouseButton1Click:Connect(function()
         isMinimized = not isMinimized
         if isMinimized then
-            mainFrame.Size = UDim2.new(0, 400, 0, 50)
+            mainFrame.Size = UDim2.new(uiParams.mainFrameSize.X.Scale, uiParams.mainFrameSize.X.Offset, 0, 40)
             for _, elem in ipairs(collapsibleElements) do
                 elem.Visible = false
             end
