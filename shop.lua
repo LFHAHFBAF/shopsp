@@ -1,4 +1,3 @@
---5.0
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local UserInputService = game:GetService("UserInputService")
@@ -74,10 +73,11 @@ local function createGUI()
     titleLabel.Size = UDim2.new(1, 0, 0, 40)
     titleLabel.Position = UDim2.new(0, 0, 0, 0)
     titleLabel.BackgroundTransparency = 1
-    titleLabel.Text = "商店控制器"
+    titleLabel.Text = "商店UI控制器"
     titleLabel.TextColor3 = Color3.new(1, 1, 1)
     titleLabel.TextSize = uiParams.titleTextSize
     titleLabel.Font = Enum.Font.SourceSansBold
+    titleLabel.TextXAlignment = Enum.TextXAlignment.Center
     titleLabel.Parent = mainFrame
 
     local authorLabel = Instance.new("TextLabel")
@@ -85,7 +85,7 @@ local function createGUI()
     authorLabel.Size = UDim2.new(1, 0, 0, 16)
     authorLabel.Position = UDim2.new(0, 0, 0, 40)
     authorLabel.BackgroundTransparency = 1
-    authorLabel.Text = "脚本by:白羽"
+    authorLabel.Text = "脚本by:白羽    版本:1.5"
     authorLabel.TextColor3 = Color3.new(1, 0, 0)
     authorLabel.TextSize = uiParams.authorTextSize
     authorLabel.Font = Enum.Font.SourceSans
