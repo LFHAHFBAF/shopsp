@@ -41,7 +41,7 @@ local function createGUI()
     end
 
     screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "通用UI控制器"
+    screenGui.Name = "STBB:UI控制器"
     screenGui.IgnoreGuiInset = true
     screenGui.DisplayOrder = 9999
     screenGui.Parent = playerGui
@@ -304,5 +304,6 @@ player.CharacterAdded:Connect(onCharacterAdded)
 if player.Character then
     onCharacterAdded(player.Character)
 end
+
 
 createGUI()
