@@ -6,7 +6,7 @@ local UserInputService = game:GetService("UserInputService")
 local shouldRecreateUI = true
 local lastFramePosition = nil
 
-local LONG_PRESS_DURATION = 0.25
+local LONG_PRESS_DURATION = 0.1
 local longPressTimer = nil
 local isLongPressing = false
 
