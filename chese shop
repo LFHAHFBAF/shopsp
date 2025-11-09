@@ -1,4 +1,4 @@
---测试版本
+--2.0测试版本
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local UserInputService = game:GetService("UserInputService")
