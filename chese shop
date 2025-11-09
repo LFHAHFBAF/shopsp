@@ -46,7 +46,7 @@ local function createGUI()
     end
 
     screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "STBB:UI控制器"
+    screenGui.Name = "STBB:UI控制器(测试版)"
     screenGui.IgnoreGuiInset = true
     screenGui.DisplayOrder = 9999
     screenGui.Parent = playerGui
