@@ -1,9 +1,14 @@
+--2.0测试版本
 local player = game.Players.LocalPlayer
 local playerGui = player:WaitForChild("PlayerGui")
 local UserInputService = game:GetService("UserInputService")
 
 local shouldRecreateUI = true
 local lastFramePosition = nil
+
+local LONG_PRESS_DURATION = 0.1
+local longPressTimer = nil
+local isLongPressing = false
 
 local uiParams = {
     mainFrameSize = UDim2.new(0, 300, 0, 360),
@@ -41,7 +46,7 @@ local function createGUI()
     end
 
     screenGui = Instance.new("ScreenGui")
-    screenGui.Name = "STBB:UI控制器"
+    screenGui.Name = "STBB:UI控制器(测试版)"
     screenGui.IgnoreGuiInset = true
     screenGui.DisplayOrder = 9999
     screenGui.Parent = playerGui
@@ -250,18 +255,25 @@ end
 UserInputService.InputBegan:Connect(function(input)
     if not mainFrame then return end
 
+    local function startLongPressDetection(startPos)
+        isLongPressing = true
+        dragStartPos = startPos
+        frameStartPos = mainFrame.Position
+        
+        longPressTimer = task.delay(LONG_PRESS_DURATION, function()
+            isDragging = true
+            mainFrame.BorderColor3 = Color3.new(0.6, 0.6, 0.6)
+        end)
+    end
+
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         if isPointInFrame(input.Position, mainFrame) then
-            isDragging = true
-            dragStartPos = input.Position
-            frameStartPos = mainFrame.Position
+            startLongPressDetection(input.Position)
         end
     elseif input.UserInputType == Enum.UserInputType.Touch then
         if not activeTouchId and isPointInFrame(input.Position, mainFrame) then
             activeTouchId = input.TouchId
-            isDragging = true
-            dragStartPos = input.Position
-            frameStartPos = mainFrame.Position
+            startLongPressDetection(input.Position)
         end
     end
 end)
@@ -287,11 +299,22 @@ UserInputService.InputChanged:Connect(function(input)
 end)
 
 UserInputService.InputEnded:Connect(function(input)
+    if longPressTimer then
+        task.cancel(longPressTimer)
+        longPressTimer = nil
+    end
+    
     if input.UserInputType == Enum.UserInputType.MouseButton1 then
         isDragging = false
+        isLongPressing = false
     elseif input.UserInputType == Enum.UserInputType.Touch and input.TouchId == activeTouchId then
         isDragging = false
+        isLongPressing = false
         activeTouchId = nil
+    end
+    
+    if mainFrame then
+        mainFrame.BorderColor3 = Color3.new(0.3, 0.3, 0.3)
     end
 end)
 
@@ -304,6 +327,5 @@ player.CharacterAdded:Connect(onCharacterAdded)
 if player.Character then
     onCharacterAdded(player.Character)
 end
-
 
 createGUI()
