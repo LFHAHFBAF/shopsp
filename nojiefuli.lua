@@ -3,5 +3,5 @@ while true do
     if jeffrey then
         jeffrey:Destroy()
     end
-    task.wait(0.025) 
+    task.wait(0.25) 
 end
